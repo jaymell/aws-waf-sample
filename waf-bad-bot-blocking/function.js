@@ -20,24 +20,26 @@ var config = {
   snsTopicArn: process.env.SNSTOPICARN
 };
 
-var wafClient = new AWS.WAF({ region: config.region });
-var snsClient = new AWS.SNS({ maxRetries: 3 });
-var lambdaClient = new AWS.Lambda({ maxRetries: 3 });
+var wafClient = null;
+var snsClient = null;
+var lambdaClient = null;
+var event = null;
 
-function parseConfig(event, callback) {
+
+function parseConfig(callback) {
   // validate config:
   if (config.wafIpSetId === undefined || config.snsTopicArn === undefined || config.region === undefined ) {
     // error out
     callback('Missing required environment variables, perhaps function is misconfigured?');
   } else {
     // export configuration object & go to next stpe
-    callback(null, { wafIpSetId: config.wafIpSetId, snsTopicArn: config.snsTopicArn }, event);
+    callback(null, { wafIpSetId: config.wafIpSetId, snsTopicArn: config.snsTopicArn });
   }
 }
 
 
 // extract and validate the source IP address
-function extractAndValidate(config, event, callback) {
+function extractAndValidate(config, callback) {
   // make sure the input event is valid
   if (event.forwardedIps !== undefined && event.forwardedIps.length !== undefined && event.forwardedIps.length > 0) {
     // working with forwarded IPs only, API Gateway acts as a proxy and adds the source IP to the x-forwarded-for header
@@ -144,7 +146,7 @@ function updateIPSet(config, sourceIp, changeToken, callback) {
           updateCallback(null, true);
         } else {
           // error out
-          updateCallback('Received an unexpected response from the server while updating the WAF IPSet');
+          updateCallback('Received an unexpected response from the server while updating the WAF IPSet: ' + result);
         }
       }
     });
@@ -188,13 +190,14 @@ function issueSNSNotification(config, sourceIp, changeToken, callback) {
 
 
 // export lambda function
-exports.handler = function(event, context, callback) {
-  
+exports.handler = function(e, context, callback) {
+  event = e;
+  wafClient = new AWS.WAF({ region: config.region, maxRetries: 30 });
+  snsClient = new AWS.SNS({ maxRetries: 30 });
+  lambdaClient = new AWS.Lambda({ maxRetries: 30 });
   // execute all actions in a waterfall sequence (assuming no steps fail)
   ASYNC.waterfall([
-    function(callback) {
-      parseConfig(event, callback);
-    },
+    parseConfig,
     extractAndValidate,
     getWAFChangeToken,
     updateIPSet,

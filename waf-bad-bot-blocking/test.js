@@ -1,14 +1,16 @@
 var AWS = require('aws-sdk-mock');
+var func = require('./function.js');
 
 AWS.mock('WAF', 'getChangeToken', function(params, callback) {
   callback(null, {ChangeToken: "abcd12f2-46da-4fdb-b8d5-fbd4c466928f"});
 });
 
-var config = {
-  region: process.env.REGION,
-  wafIpSetId: process.env.WAFIPSETID,
-  snsTopicArn: process.env.SNSTOPICARN
-};
+AWS.mock('WAF', 'updateIPSet', function(params, callback) {
+  callback(null, {ChangeToken: "abcd12f2-46da-4fdb-b8d5-fbd4c466928f"});
+});
 
-var WAF = new AWS.WAF();
-console.log('success');
+AWS.mock('SNS', 'publish', function(params, callback) {
+  callback(null, {MessageId: '0'});
+});
+
+exports.handler = func.handler;
