@@ -4,11 +4,15 @@
   "description": "Blacklist an IP address hitting a honeypot URL using the AWS WAF service",
   "main": "function.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "test/test.sh"
   },
   "repository": {},
   "dependencies": {
     "async": "^1.5.2",
+    "aws-sdk-mock": "^1.6.1",
+    "bluebird": "^3.4.7",
+    "lambda-local": "^1.3.0",
+    "mocha": "^3.2.0",
     "validator": "^4.5.2"
   },
   "devDependencies": {
@@ -22,6 +26,6 @@
     "async",
     "validator"
   ],
-  "author": "Vlad Vlasceanu",
+  "author": "not Vlad Vlasceanu",
   "license": "SEE LICENSE IN LICENSE.txt"
 }
