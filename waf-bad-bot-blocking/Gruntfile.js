@@ -17,6 +17,9 @@ var grunt = require('grunt');
 // load modules
 grunt.loadNpmTasks('grunt-aws-lambda');
 
+// unit testing hooks
+grunt.loadNpmTasks('grunt-shell');
+
 // define configuration
 grunt.initConfig({
 	pkg: grunt.file.readJSON('package.json'),
@@ -38,5 +41,13 @@ grunt.initConfig({
 				dist_folder: 'dist',
 			}
 		}
-	}
+	},
+    // for unit testing:
+    shell: {
+      target: {
+        command: 'test/test.sh'
+      }
+    }
 });
+
+grunt.registerTask('default', 'shell');

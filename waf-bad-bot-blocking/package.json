@@ -18,8 +18,9 @@
   "devDependencies": {
     "aws-sdk": "latest",
     "grunt": "latest",
-    "grunt-pack": "latest",
     "grunt-aws-lambda": "latest",
+    "grunt-pack": "latest",
+    "grunt-shell": "^2.1.0",
     "npm": "latest"
   },
   "bundledDependencies": [
